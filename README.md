@@ -62,15 +62,15 @@ The project combines real-world color theory, interactive UI engineering, access
 
 ### Main Mixing Interface
 
-![Dark Theme Main](preview-1.png)
+![Dark Theme Main](Assets/preview-1.png)
 
 ### Accessibility Checker, History & Venn Diagram
 
-![Dark Theme Accessibility](preview-2.png)
+![Dark Theme Accessibility](Assets/preview-2.png)
 
 ### Formula Breakdown & Technical Explanation
 
-![Dark Theme Formula](preview-3.png)
+![Dark Theme Formula](Assets/preview-3.png)
 
 ---
 
@@ -78,15 +78,15 @@ The project combines real-world color theory, interactive UI engineering, access
 
 ### Paint Mixing Main Interface
 
-![Light Theme Main](preview-4.png)
+![Light Theme Main](Assets/preview-4.png)
 
 ### Accessibility Checker, History & Venn Diagram
 
-![Light Theme Accessibility](preview-5.png)
+![Light Theme Accessibility](Assets/preview-5.png)
 
 ### Formula Explanation & Mixing Breakdown
 
-![Light Theme Formula](preview-6.png)
+![Light Theme Formula](Assets/preview-6.png)
 
 ---
 
