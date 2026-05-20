@@ -168,13 +168,13 @@ chromafuse/
 ├── robots.txt
 ├── sitemap.xml
 ├── og-preview.png
-├── preview-1.png
-├── preview-2.png
-├── preview-3.png
-├── preview-4.png
-├── preview-5.png
-├── preview-6.png
-└── demo.mp4
+└── Assets
+   ├── preview-1.png
+   ├── preview-2.png
+   ├── preview-3.png
+   ├── preview-4.png
+   ├── preview-5.png
+   └── preview-6.png
 ```
 
 > Why a single-file architecture?
