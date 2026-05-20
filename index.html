@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<!--
+  Copyright (c) 2026 jeyaprathap-LSA-01. All Rights Reserved.
+
+  This source code is proprietary and for portfolio purposes only.
+  Unauthorized commercial use, modification, distribution, or sublicensing
+  is strictly prohibited without explicit written permission from the author.
+
+  See the LICENSE file in the root directory for full terms.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChromaFuse — Free RGB & CMYK Color Mixer | Interactive Color Theory Lab</title>
+    <meta name="description" content="Mix RGB and CMYK colors in real time. ChromaFuse is a free interactive color theory lab with additive and subtractive mixing, live Venn diagrams, hex copy, and step-by-step formulas. No signup required.">
+    <meta name="keywords" content="RGB color mixer, CMYK color mixer, color mixing tool, color theory, additive color mixing, subtractive color mixing, hex color blender, paint color mixing simulator, online color lab, color blend calculator">
+    <meta name="author" content="JP">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <link rel="canonical" href="https://chromafuse.netlify.app/">
+    <meta property="og:title" content="ChromaFuse — Free Interactive RGB & CMYK Color Mixing Lab">
+    <meta property="og:description" content="Mix colors in real time. Additive RGB + subtractive CMYK, live formulas, Venn diagram preview. Free, no signup.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://chromafuse.netlify.app/">
+    <meta property="og:site_name" content="ChromaFuse">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebApplication","name":"ChromaFuse","url":"https://chromafuse.netlify.app/","description":"Free interactive RGB and CMYK color mixing lab.","applicationCategory":"DesignApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"JP"}}
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{display:['Space Grotesk','sans-serif'],body:['DM Sans','sans-serif']}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23E8A838'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' fill='%230a0a0a' text-anchor='middle'>CF</text></svg>">
+    <style>
+/*
+ * Copyright (c) 2026 jeyaprathap-LSA-01. All Rights Reserved.
+ *
+ * This source code is proprietary and for portfolio purposes only.
+ * Unauthorized commercial use, modification, distribution, or sublicensing
+ * is strictly prohibited without explicit written permission from the author.
+ *
+ * See the LICENSE file in the root directory for full terms.
+ */
+        /* ========================
+           THEME VARIABLES
+           ======================== */
+        :root, [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --fg: #f0ede8;
+            --muted: #777;
+            --accent: #E8A838;
+            --accent-dim: rgba(232,168,56,0.15);
+            --card: #131313;
+            --border: #252525;
+            --surface: #1a1a1a;
+            --teal: #4ECDC4;
+            --shadow: rgba(0,0,0,0.4);
+            --particle-opacity: 0.5;
+            --slider-thumb-bg: var(--fg);
+            --slider-thumb-border: var(--accent);
+            --slider-thumb-shadow: rgba(0,0,0,0.4);
+            --snap-dot-bg: var(--fg);
+            --snap-dot-active-bg: #4ECDC4;
+            --snap-dot-active-glow: rgba(78,205,196,0.6);
+            --formula-info-bg: rgba(255,255,255,0.03);
+            --result-bar-bg: rgba(232,168,56,0.06);
+            --result-bar-border: rgba(232,168,56,0.15);
+            --hover-lift-bg: rgba(255,255,255,0.04);
+        }
+        [data-theme="light"] {
+            --bg: #f5f4f0;
+            --fg: #1a1814;
+            --muted: #888;
+            --accent: #c47f0a;
+            --accent-dim: rgba(196,127,10,0.12);
+            --card: #ffffff;
+            --border: #e0ddd8;
+            --surface: #eeece8;
+            --teal: #2aa39b;
+            --shadow: rgba(0,0,0,0.12);
+            --particle-opacity: 0.25;
+            --slider-thumb-bg: #ffffff;
+            --slider-thumb-border: var(--accent);
+            --slider-thumb-shadow: rgba(0,0,0,0.25);
+            --snap-dot-bg: #555;
+            --snap-dot-active-bg: var(--teal);
+            --snap-dot-active-glow: rgba(42,163,155,0.5);
+            --formula-info-bg: rgba(0,0,0,0.03);
+            --result-bar-bg: rgba(196,127,10,0.08);
+            --result-bar-border: rgba(196,127,10,0.2);
+            --hover-lift-bg: rgba(0,0,0,0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 15% 30%, rgba(232,168,56,0.04) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 500px at 85% 60%, rgba(240,100,73,0.03) 0%, transparent 70%),
+                radial-gradient(ellipse 800px 300px at 50% 90%, rgba(100,200,180,0.02) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        [data-theme="light"] body::before {
+            background:
+                radial-gradient(ellipse 600px 400px at 15% 30%, rgba(196,127,10,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 500px at 85% 60%, rgba(240,100,73,0.04) 0%, transparent 70%);
+        }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+
+        input[type="color"] { -webkit-appearance:none; border:none; cursor:pointer; padding:0; background:none; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding:0; }
+        input[type="color"]::-webkit-color-swatch { border:3px solid var(--border); border-radius:50%; transition:border-color 0.3s; }
+        input[type="color"]:hover::-webkit-color-swatch { border-color:var(--accent); }
+
+        .val-input {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            font-family: 'Space Grotesk', monospace;
+            font-size: 14px;
+            padding: 7px 8px;
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+            transition: border-color 0.25s, box-shadow 0.25s, background 0.4s, color 0.4s;
+            outline: none;
+        }
+        .val-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+        .val-input.invalid { border-color:#e74c3c; box-shadow:0 0 0 3px rgba(231,76,60,0.15); }
+
+        .mode-toggle { display:flex; background:var(--surface); border-radius:14px; padding:4px; border:1px solid var(--border); gap:4px; transition:background 0.4s,border-color 0.4s; }
+        .mode-btn { padding:10px 22px; border-radius:11px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; cursor:pointer; transition:all 0.3s ease; border:none; background:transparent; color:var(--muted); white-space:nowrap; }
+        .mode-btn.active { background:var(--accent); color:#0a0a0a; box-shadow:0 2px 16px rgba(232,168,56,0.35); }
+        .mode-btn:not(.active):hover { color:var(--fg); background:var(--hover-lift-bg); }
+
+        .theme-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--fg);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .theme-btn:hover { border-color: var(--accent); color: var(--accent); transform: rotate(20deg); }
+
+        .result-glow { position:absolute; inset:-20px; border-radius:50%; filter:blur(40px); opacity:0.35; transition:background-color 0.5s ease; pointer-events:none; }
+        .result-ring { position:absolute; inset:-6px; border-radius:50%; border:2px dashed var(--border); animation:spin-slow 25s linear infinite; }
+        .result-ring::after { content:''; position:absolute; inset:6px; border-radius:50%; border:1px dashed rgba(128,128,128,0.08); animation:spin-slow 15s linear infinite reverse; }
+        @keyframes spin-slow { to { transform:rotate(360deg); } }
+
+        .color-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 24px;
+            transition: border-color 0.3s, transform 0.25s, background 0.4s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .color-card:hover { border-color:rgba(128,128,128,0.15); transform:translateY(-3px); box-shadow:0 8px 30px var(--shadow); }
+        .color-card::after { content:''; position:absolute; inset:0; border-radius:20px; background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.04) 50%, transparent 70%); background-size:200% 100%; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+        .color-card:hover::after { opacity:1; animation:shimmer-sweep 0.7s ease forwards; }
+        @keyframes shimmer-sweep { from{background-position:200% 0} to{background-position:-200% 0} }
+
+        .formula-block { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 20px; font-family:'Space Grotesk',monospace; font-size:13px; line-height:2; overflow-x:auto; transition:background 0.4s,border-color 0.4s; }
+        .formula-block .hl { color:var(--accent); font-weight:600; }
+        .formula-block .cm { color:#6a9; }
+        .formula-block .zero { color:#e74c3c; font-weight:700; }
+        .formula-block .val { color:var(--teal); }
+        .formula-block .res { color:var(--accent); font-weight:700; font-size:14px; }
+
+        .toast-container { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+        .toast { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 20px; font-size:13px; transform:translateX(120%); opacity:0; transition:all 0.35s cubic-bezier(0.4,0,0.2,1); display:flex; align-items:center; gap:10px; box-shadow:0 4px 20px var(--shadow); }
+        .toast.show { transform:translateX(0); opacity:1; }
+        .toast i { color:var(--accent); }
+
+        .particle { position:fixed; border-radius:50%; pointer-events:none; z-index:0; opacity:0; animation:float-particle linear infinite; }
+        @keyframes float-particle { 0%{transform:translateY(0) rotate(0deg);opacity:0} 8%{opacity:var(--particle-opacity)} 85%{opacity:calc(var(--particle-opacity)*0.8)} 100%{transform:translateY(-100vh) rotate(540deg);opacity:0} }
+
+        #vennCanvas { border-radius:16px; display:block; animation:fade-in 0.8s ease 0.4s both; }
+
+        .copy-btn { background:none; border:none; color:var(--muted); cursor:pointer; padding:4px 6px; border-radius:6px; transition:color 0.2s,background 0.2s; font-size:12px; }
+        .copy-btn:hover { color:var(--accent); background:var(--accent-dim); }
+
+        .section-label { font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+
+        /* ========================
+           INTENSITY SLIDER
+           ======================== */
+        .slider-container { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 24px; transition:all 0.4s ease; overflow:hidden; }
+        .slider-container.hidden-slider { max-height:0; padding:0 24px; border-color:transparent; margin-bottom:0 !important; opacity:0; }
+        .slider-wrapper { position:relative; padding:0 11px; }
+        .slider-track {
+            -webkit-appearance:none; appearance:none; width:100%; height:8px; border-radius:4px;
+            background: linear-gradient(to right, #4ECDC4, var(--accent), #e74c3c);
+            outline:none; cursor:pointer; position:relative; z-index:2;
+        }
+        /* Light theme: stronger track border for visibility */
+        [data-theme="light"] .slider-track {
+            height: 10px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 5px;
+        }
+        .slider-track::-webkit-slider-thumb {
+            -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%;
+            background: var(--slider-thumb-bg);
+            border: 3px solid var(--slider-thumb-border);
+            cursor:pointer;
+            box-shadow: 0 2px 8px var(--slider-thumb-shadow);
+            transition: transform 0.15s, border-color 0.2s;
+        }
+        .slider-track::-webkit-slider-thumb:hover { transform:scale(1.15); }
+        .slider-track.snapped::-webkit-slider-thumb { border-color:var(--snap-dot-active-bg); box-shadow:0 0 12px var(--snap-dot-active-glow); }
+        .slider-track::-moz-range-thumb {
+            width:22px; height:22px; border-radius:50%;
+            background: var(--slider-thumb-bg);
+            border: 3px solid var(--slider-thumb-border);
+            cursor:pointer;
+        }
+        .snap-markers { position:absolute; top:50%; left:11px; right:11px; transform:translateY(-50%); height:8px; pointer-events:none; z-index:1; }
+		.snap-dot {
+			position: absolute;
+			width: 4px;
+			height: 4px;
+			border-radius: 50%;
+			background: rgba(255,255,255,0.5);
+			top: 50%;
+			transform: translate(-50%, -50%);
+			opacity: 0.3;
+			transition: opacity 0.3s, transform 0.3s, background 0.3s;
+		}
+		[data-theme="light"] .snap-dot {
+			width: 4px;
+			height: 4px;
+			background: rgba(0,0,0,0.2);
+			opacity: 0.35;
+		}
+		.snap-dot.active {
+			opacity: 1;
+			transform: translate(-50%, -50%) scale(2.2);
+			background: var(--snap-dot-active-bg);
+			box-shadow: 0 0 8px var(--snap-dot-active-glow);
+		}
+		[data-theme="light"] .snap-dot.active {
+			background: var(--teal);
+			box-shadow: 0 0 6px rgba(42,163,155,0.4);
+		}
+        .snap-labels { display:flex; justify-content:space-between; margin-top:8px; padding:0 2px; position:relative; }
+        #snapLabel50 { position:absolute; left:50%; transform:translateX(-50%); }
+		.snap-label {
+			font-family: 'Space Grotesk', sans-serif;
+			font-size: 10px;
+			color: #999;
+			text-align: center;
+			transition: color 0.3s, font-weight 0.3s;
+			cursor: pointer;
+			padding: 2px 8px;
+			border-radius: 4px;
+		}
+		.snap-label:hover {
+			color: var(--fg);
+			background: var(--hover-lift-bg);
+		}
+		.snap-label.active {
+			color: #4ECDC4;
+			font-weight: 700;
+		}
+		.snap-label span {
+			opacity: 0.7;
+		}
+		[data-theme="light"] .snap-label {
+			color: #555; 
+		}
+		[data-theme="light"] .snap-label:hover {
+			color: #111;
+			background: rgba(0,0,0,0.06);
+		}
+		[data-theme="light"] .snap-label.active {
+			color: var(--teal);
+		}
+		[data-theme="light"] .snap-label span {
+			opacity: 0.85 !important;
+		}
+        .color-chip { display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:middle; margin-right:4px; border:1px solid rgba(128,128,128,0.2); }
+        .result-bar { display:flex; align-items:center; gap:10px; margin-top:12px; padding:12px 16px; border-radius:10px; background:var(--result-bar-bg); border:1px solid var(--result-bar-border); }
+        .result-swatch { width:48px; height:48px; border-radius:10px; border:2px solid rgba(128,128,128,0.15); flex-shrink:0; transition:background-color 0.4s; }
+        .term-toggle-wrap { display:inline-flex; align-items:center; gap:8px; }
+        .term-toggle { display:inline-flex; background:var(--surface); border-radius:12px; padding:3px; border:1px solid var(--border); gap:2px; position:relative; }
+        .term-btn { padding:6px 14px; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:11px; cursor:pointer; transition:all 0.3s ease; border:none; background:transparent; color:var(--muted); white-space:nowrap; }
+        .term-btn.active { background:var(--teal); color:#0a0a0a; box-shadow:0 2px 12px rgba(78,205,196,0.3); }
+        .term-btn:not(.active):hover { color:var(--fg); background:var(--hover-lift-bg); }
+        .term-badge { display:inline-block; font-size:9px; font-weight:700; color:var(--teal); background:rgba(78,205,196,0.12); padding:2px 7px; border-radius:6px; letter-spacing:0.06em; text-transform:uppercase; }
+        .term-changed { animation:term-flash 0.6s ease; }
+        @keyframes term-flash { 0%{background-color:rgba(78,205,196,0.15)} 100%{background-color:transparent} }
+
+        /* ========================
+           COLOR HISTORY
+           ======================== */
+        .history-strip { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+        .history-swatch { width:28px; height:28px; border-radius:8px; cursor:pointer; border:2px solid transparent; transition:all 0.2s; position:relative; flex-shrink:0; }
+        .history-swatch:hover { transform:scale(1.15); border-color:var(--accent); }
+        .history-swatch[title]:hover::after { content:attr(title); position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%); background:var(--card); border:1px solid var(--border); border-radius:6px; padding:2px 6px; font-size:10px; font-family:'Space Grotesk',sans-serif; white-space:nowrap; color:var(--fg); z-index:10; }
+
+        /* ========================
+           CONTRAST CHECKER
+           ======================== */
+        .contrast-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:8px; font-size:12px; font-family:'Space Grotesk',sans-serif; font-weight:700; }
+        .contrast-badge.pass { background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid rgba(46,204,113,0.3); }
+        .contrast-badge.fail { background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); }
+
+        /* ========================
+           PALETTE SECTION
+           ======================== */
+        .palette-swatch {
+            height: 52px; border-radius: 10px; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--border); position: relative; overflow: hidden;
+        }
+        .palette-swatch:hover { transform:scale(1.04); box-shadow:0 4px 16px var(--shadow); }
+        .palette-swatch .swatch-label { position:absolute; bottom:0; left:0; right:0; padding:3px 6px; font-size:10px; font-family:'Space Grotesk',monospace; text-align:center; opacity:0; transition:opacity 0.2s; }
+        .palette-swatch:hover .swatch-label { opacity:1; }
+
+        /* ========================
+           SCROLL REVEAL
+           ======================== */
+        .reveal { opacity:0; transform:translateY(32px); transition:opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1); }
+        .reveal.visible { opacity:1; transform:translateY(0); }
+        .reveal-delay-1 { transition-delay:0.08s; }
+        .reveal-delay-2 { transition-delay:0.16s; }
+        .reveal-delay-3 { transition-delay:0.24s; }
+        .reveal-delay-4 { transition-delay:0.32s; }
+
+        @keyframes header-in { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+        header { animation:header-in 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+
+        @keyframes letter-pop { 0%{transform:scale(1)} 40%{transform:scale(1.18) rotate(-3deg)} 100%{transform:scale(1) rotate(0deg)} }
+        h1:hover .accent-letter { display:inline-block; animation:letter-pop 0.4s ease forwards; }
+
+        .mode-btn,.copy-btn,button[onclick] { transition:transform 0.12s ease,box-shadow 0.12s ease,all 0.3s ease; }
+        .mode-btn:active, button[onclick]:active { transform:scale(0.95) !important; }
+
+        @keyframes result-pulse { 0%{box-shadow:0 0 0 0 rgba(255,255,255,0.3)} 70%{box-shadow:0 0 0 18px rgba(255,255,255,0)} 100%{box-shadow:0 0 0 0 rgba(255,255,255,0)} }
+        .result-pulse-anim { animation:result-pulse 0.5s ease-out; }
+
+        @keyframes fade-in { from{opacity:0} to{opacity:1} }
+        footer { animation:fade-in 1s ease 0.8s both; }
+
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-track { background:var(--bg); }
+        ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+        @media (max-width:768px) { .color-card{padding:20px 16px} .section-header-row{flex-direction:column;align-items:flex-start !important;gap:12px} }
+		/* Small screen fixes */
+		@media (max-width: 640px) {
+			/* Prevent horizontal overflow */
+			body {
+				overflow-x: hidden;
+			}
+
+			/* Reduce card padding */
+			.color-card {
+				padding: 18px 14px;
+				border-radius: 14px;
+			}
+
+			/* Make color pickers smaller */
+			input[type="color"] {
+				width: 70px !important;
+				height: 70px !important;
+			}
+
+			/* Smaller result circle */
+			#resultCircle {
+				width: 100px !important;
+				height: 100px !important;
+			}
+
+			.result-glow {
+				inset: -14px;
+				filter: blur(28px);
+			}
+
+			.result-ring {
+				inset: -4px;
+			}
+
+			/* Smaller val-inputs */
+			.val-input {
+				font-size: 12px;
+				padding: 5px 4px;
+			}
+
+			/* Smaller section labels */
+			.section-label {
+				font-size: 9px;
+				letter-spacing: 0.08em;
+			}
+
+			/* Reduce formula block size */
+			.formula-block {
+				font-size: 11px;
+				line-height: 1.8;
+				padding: 12px 14px;
+			}
+
+			/* Result swatch smaller */
+			.result-swatch {
+				width: 36px;
+				height: 36px;
+			}
+
+			/* Slider container tighter */
+			.slider-container {
+				padding: 14px 16px;
+			}
+
+			/* Header smaller */
+			h1 {
+				font-size: 1.5rem !important;
+			}
+
+			/* Palette swatches shorter */
+			.palette-swatch {
+				height: 38px;
+			}
+
+			/* History swatches smaller */
+			.history-swatch {
+				width: 24px;
+				height: 24px;
+			}
+
+			/* Venn canvas responsive */
+			#vennCanvas {
+				max-width: 100%;
+				height: auto;
+			}
+
+			/* Quick action buttons wrap nicely */
+			button[onclick] {
+				padding: 8px 14px !important;
+				font-size: 12px !important;
+			}
+
+			/* Mode toggle compact */
+			.mode-btn {
+				padding: 8px 14px;
+				font-size: 11px;
+			}
+
+			/* Theme button compact */
+			.theme-btn {
+				width: 34px;
+				height: 34px;
+				font-size: 14px;
+			}
+
+			/* Term toggle compact */
+			.term-btn {
+				padding: 4px 10px;
+				font-size: 10px;
+			}
+
+			/* Contrast section stack */
+			.contrast-badge {
+				font-size: 10px;
+				padding: 3px 7px;
+			}
+
+			/* Result bar compact */
+			.result-bar {
+				padding: 8px 12px;
+				gap: 8px;
+			}
+		}
+
+		/* Very small screens (below 380px) */
+		@media (max-width: 380px) {
+			.color-card {
+				padding: 14px 10px;
+			}
+
+			input[type="color"] {
+				width: 56px !important;
+				height: 56px !important;
+			}
+
+			.val-input {
+				font-size: 11px;
+				padding: 4px 2px;
+			}
+
+			h1 {
+				font-size: 1.3rem !important;
+			}
+
+			.mode-btn {
+				padding: 7px 10px;
+				font-size: 10px;
+			}
+		}
+    </style>
+</head>
+<body class="relative">
+
+    <div id="particles" aria-hidden="true"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10">
+            <div>
+                <h1 class="font-display text-3xl sm:text-4xl font-bold tracking-tight" style="color:var(--fg);">
+                    Chroma<span class="accent-letter" style="color:var(--accent);">Fuse</span>
+                </h1>
+                <p class="mt-1 text-sm" style="color:var(--muted);">Interactive color mixing lab — additive &amp; subtractive</p>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <div class="mode-toggle" role="radiogroup" aria-label="Mixing mode">
+                    <button class="mode-btn active" id="btnDigital" role="radio" aria-checked="true" onclick="setMode('digital')">
+                        <i class="fa-solid fa-display mr-2"></i>Digital RGB
+                    </button>
+                    <button class="mode-btn" id="btnPaint" role="radio" aria-checked="false" onclick="setMode('paint')">
+                        <i class="fa-solid fa-palette mr-2"></i>Paint CMY
+                    </button>
+                </div>
+                <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark theme" aria-label="Toggle theme">
+                    <i class="fa-solid fa-sun" id="themeIcon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mode info bar -->
+        <div id="modeInfo" class="reveal mb-6 px-5 py-3 rounded-xl text-sm flex items-center gap-3" style="background:var(--accent-dim);border:1px solid rgba(232,168,56,0.2);">
+            <i class="fa-solid fa-circle-info" style="color:var(--accent);"></i>
+            <span id="modeInfoText" style="color:var(--fg);">Digital mode: Colors are averaged (additive mixing) — like mixing light on a screen.</span>
+        </div>
+
+        <!-- Subtractive Intensity Slider -->
+        <div class="slider-container hidden-slider mb-6" id="sliderContainer">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <span class="section-label" style="color:var(--accent);" id="sliderLabel">Pigment Intensity</span>
+                    <span class="ml-2 text-xs" style="color:var(--muted);" id="sliderDesc">How strongly pigments absorb light</span>
+                </div>
+                <div class="font-display font-bold text-lg" style="color:var(--accent);" id="intensityValue">0.50</div>
+            </div>
+            <div class="slider-wrapper">
+                <div class="snap-markers">
+                    <div class="snap-dot active" id="snapDot0" style="left:0%;"></div>
+                    <div class="snap-dot" id="snapDot50" style="left:50%;"></div>
+                    <div class="snap-dot" id="snapDot100" style="left:100%;"></div>
+                </div>
+                <input type="range" min="0" max="100" value="50" class="slider-track" id="intensitySlider"
+                       oninput="onIntensityInput()" onchange="onIntensityChange()" aria-label="Pigment intensity">
+            </div>
+            <div class="snap-labels">
+                <span class="snap-label" id="snapLabel0" onclick="snapTo(0)">0.00<br><span style="font-size:9px;opacity:0.6;" id="snapText0">Light-like</span></span>
+                <span class="snap-label active" id="snapLabel50" onclick="snapTo(50)">0.50<br><span style="font-size:9px;opacity:0.6;" id="snapText50">Balanced</span></span>
+                <span class="snap-label" id="snapLabel100" onclick="snapTo(100)">1.00<br><span style="font-size:9px;opacity:0.6;" id="snapText100">Ideal pigment</span></span>
+            </div>
+        </div>
+
+        <!-- Main mixing area -->
+        <section class="reveal grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1.3fr] gap-6 items-center mb-10">
+            <!-- Color 1 Card -->
+            <div class="color-card flex flex-col items-center gap-4" id="card1">
+                <div class="section-label">Color 1</div>
+                <input type="color" id="color1" value="#FFA500" style="width:90px;height:90px;"
+                       aria-label="Color 1 picker" onchange="onColorChange()" oninput="onColorChange()">
+                <div class="w-full">
+                    <label class="section-label block mb-1">Hex</label>
+                    <input type="text" class="val-input" id="hex1" value="#FFA500" maxlength="7" aria-label="Color 1 hex" oninput="onHexInput(1)">
+                </div>
+                <div class="grid grid-cols-3 gap-2 w-full">
+                    <div><label class="section-label block mb-1">R</label><input type="number" class="val-input" id="r1" min="0" max="255" value="255" oninput="onRGBInput(1)"></div>
+                    <div><label class="section-label block mb-1">G</label><input type="number" class="val-input" id="g1" min="0" max="255" value="165" oninput="onRGBInput(1)"></div>
+                    <div><label class="section-label block mb-1">B</label><input type="number" class="val-input" id="b1" min="0" max="255" value="0" oninput="onRGBInput(1)"></div>
+                </div>
+                <div class="w-full">
+                    <label class="section-label block mb-1">HSL</label>
+                    <div class="val-input text-xs" id="hsl1" style="cursor:default;text-align:left;padding:6px 10px;">hsl(39°, 100%, 50%)</div>
+                </div>
+            </div>
+
+            <div class="hidden lg:flex items-center justify-center">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center font-display font-bold text-xl" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);">+</div>
+            </div>
+            <div class="flex lg:hidden items-center justify-center">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-lg" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);">+</div>
+            </div>
+
+            <!-- Color 2 Card -->
+            <div class="color-card flex flex-col items-center gap-4" id="card2">
+                <div class="section-label">Color 2</div>
+                <input type="color" id="color2" value="#0000FF" style="width:90px;height:90px;"
+                       aria-label="Color 2 picker" onchange="onColorChange()" oninput="onColorChange()">
+                <div class="w-full">
+                    <label class="section-label block mb-1">Hex</label>
+                    <input type="text" class="val-input" id="hex2" value="#0000FF" maxlength="7" aria-label="Color 2 hex" oninput="onHexInput(2)">
+                </div>
+                <div class="grid grid-cols-3 gap-2 w-full">
+                    <div><label class="section-label block mb-1">R</label><input type="number" class="val-input" id="r2" min="0" max="255" value="0" oninput="onRGBInput(2)"></div>
+                    <div><label class="section-label block mb-1">G</label><input type="number" class="val-input" id="g2" min="0" max="255" value="0" oninput="onRGBInput(2)"></div>
+                    <div><label class="section-label block mb-1">B</label><input type="number" class="val-input" id="b2" min="0" max="255" value="255" oninput="onRGBInput(2)"></div>
+                </div>
+                <div class="w-full">
+                    <label class="section-label block mb-1">HSL</label>
+                    <div class="val-input text-xs" id="hsl2" style="cursor:default;text-align:left;padding:6px 10px;">hsl(240°, 100%, 50%)</div>
+                </div>
+            </div>
+
+            <div class="hidden lg:flex items-center justify-center">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center font-display font-bold text-xl" style="background:var(--accent);color:#0a0a0a;">=</div>
+            </div>
+            <div class="flex lg:hidden items-center justify-center">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-lg" style="background:var(--accent);color:#0a0a0a;">=</div>
+            </div>
+
+            <!-- Result Card -->
+            <div class="color-card flex flex-col items-center gap-5" id="resultCard" style="border-color:rgba(232,168,56,0.15);">
+                <div class="section-label" style="color:var(--accent);">Mixed Result</div>
+                <div class="relative flex items-center justify-center" style="width:160px;height:160px;">
+                    <div class="result-glow" id="resultGlow"></div>
+                    <div class="result-ring"></div>
+                    <div id="resultCircle" style="width:140px;height:140px;border-radius:50%;transition:background-color 0.4s ease;position:relative;z-index:2;cursor:pointer;"
+                         onclick="copyResultHex()" title="Click to copy hex"></div>
+                </div>
+                <div class="w-full">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="section-label">Hex</label>
+                        <button class="copy-btn" onclick="copyResultHex()" aria-label="Copy hex"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                    <input type="text" class="val-input font-bold" id="resultHex" value="#805380" maxlength="7" aria-label="Result hex" oninput="onResultHexInput()">
+                </div>
+                <div class="w-full">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="section-label">RGB</label>
+                        <button class="copy-btn" onclick="copyResultRGB()" aria-label="Copy RGB"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div><input type="number" class="val-input" id="rr" min="0" max="255" value="128" oninput="onResultRGBInput()"></div>
+                        <div><input type="number" class="val-input" id="rg" min="0" max="255" value="83" oninput="onResultRGBInput()"></div>
+                        <div><input type="number" class="val-input" id="rb" min="0" max="255" value="128" oninput="onResultRGBInput()"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-1">
+                        <span class="text-center" style="font-size:10px;color:var(--muted);">R</span>
+                        <span class="text-center" style="font-size:10px;color:var(--muted);">G</span>
+                        <span class="text-center" style="font-size:10px;color:var(--muted);">B</span>
+                    </div>
+                </div>
+                <div class="w-full">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="section-label">CMYK</label>
+                        <button class="copy-btn" onclick="copyResultCMYK()" aria-label="Copy CMYK"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div><input type="number" class="val-input" id="rc" min="0" max="100" value="0" oninput="onResultCMYKInput()"></div>
+                        <div><input type="number" class="val-input" id="rm" min="0" max="100" value="35" oninput="onResultCMYKInput()"></div>
+                        <div><input type="number" class="val-input" id="ry" min="0" max="100" value="0" oninput="onResultCMYKInput()"></div>
+                        <div><input type="number" class="val-input" id="rk" min="0" max="100" value="50" oninput="onResultCMYKInput()"></div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 mt-1">
+                        <span class="text-center" style="font-size:10px;color:var(--muted);">C</span>
+                        <span class="text-center" style="font-size:10px;color:var(--muted);">M</span>
+                        <span class="text-center" style="font-size:10px;color:var(--muted);">Y</span>
+                        <span class="text-center" style="font-size:10px;color:var(--muted);">K</span>
+                    </div>
+                </div>
+                <div class="w-full">
+                    <label class="section-label block mb-1">HSL</label>
+                    <div class="val-input text-xs" id="hslResult" style="cursor:default;text-align:left;padding:6px 10px;">—</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contrast Checker -->
+        <section class="reveal reveal-delay-1 mb-8">
+            <div class="color-card" style="border-radius:16px;padding:20px 24px;">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-display text-base font-semibold mb-1" style="color:var(--fg);">
+                            <i class="fa-solid fa-eye mr-2" style="color:var(--accent);"></i>Contrast Checker
+                        </h2>
+                        <p class="text-xs" style="color:var(--muted);">WCAG accessibility ratio between Color 1 &amp; Color 2</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="font-display font-bold text-2xl" id="contrastRatio" style="color:var(--fg);">—</div>
+                        <div id="contrastAA" class="contrast-badge fail"><i class="fa-solid fa-xmark mr-1"></i>AA</div>
+                        <div id="contrastAAA" class="contrast-badge fail"><i class="fa-solid fa-xmark mr-1"></i>AAA</div>
+                        <div id="contrastPreview" style="padding:8px 16px;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;border:1px solid var(--border);min-width:120px;text-align:center;">
+                            Sample Text
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Venn Diagram -->
+        <section class="reveal reveal-delay-1 mb-10">
+            <h2 class="font-display text-lg font-semibold mb-4" style="color:var(--fg);">Mixing Preview</h2>
+            <div class="flex justify-center">
+                <canvas id="vennCanvas" width="480" height="260" style="max-width:100%;background:var(--card);border:1px solid var(--border);"></canvas>
+            </div>
+        </section>
+
+        <!-- Palette Generator -->
+        <section class="reveal reveal-delay-2 mb-10">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-display text-lg font-semibold" style="color:var(--fg);">
+                    <i class="fa-solid fa-swatchbook mr-2" style="color:var(--accent);"></i>Generated Palettes
+                </h2>
+                <button onclick="regeneratePalettes()" class="px-4 py-2 rounded-xl text-xs font-display font-semibold transition-all hover:scale-105" style="background:var(--surface);border:1px solid var(--border);color:var(--fg);">
+                    <i class="fa-solid fa-arrows-rotate mr-1" style="color:var(--accent);"></i>Refresh
+                </button>
+            </div>
+            <div class="grid gap-4">
+                <div>
+                    <div class="section-label mb-2">Tints (Color 1 → White)</div>
+                    <div class="grid grid-cols-5 gap-2" id="tintsPalette1"></div>
+                </div>
+                <div>
+                    <div class="section-label mb-2">Shades (Color 1 → Black)</div>
+                    <div class="grid grid-cols-5 gap-2" id="shadesPalette1"></div>
+                </div>
+                <div>
+                    <div class="section-label mb-2">Mix Gradient (Color 1 → Color 2)</div>
+                    <div class="grid grid-cols-7 gap-2" id="mixGradient"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="reveal reveal-delay-2 flex flex-wrap gap-3 mb-10">
+            <button onclick="swapColors()" class="px-5 py-2.5 rounded-xl text-sm font-display font-semibold transition-all hover:scale-105" style="background:var(--surface);border:1px solid var(--border);color:var(--fg);">
+                <i class="fa-solid fa-arrow-right-arrow-left mr-2" style="color:var(--accent);"></i>Swap Colors
+            </button>
+            <button onclick="randomColors()" class="px-5 py-2.5 rounded-xl text-sm font-display font-semibold transition-all hover:scale-105" style="background:var(--surface);border:1px solid var(--border);color:var(--fg);">
+                <i class="fa-solid fa-dice mr-2" style="color:var(--accent);"></i>Random Colors
+            </button>
+            <button onclick="resetColors()" class="px-5 py-2.5 rounded-xl text-sm font-display font-semibold transition-all hover:scale-105" style="background:var(--surface);border:1px solid var(--border);color:var(--fg);">
+                <i class="fa-solid fa-rotate-left mr-2" style="color:var(--accent);"></i>Reset
+            </button>
+            <button onclick="copyAllFormats()" class="px-5 py-2.5 rounded-xl text-sm font-display font-semibold transition-all hover:scale-105" style="background:var(--surface);border:1px solid var(--border);color:var(--fg);">
+                <i class="fa-solid fa-clipboard mr-2" style="color:var(--accent);"></i>Copy All Formats
+            </button>
+        </section>
+
+        <!-- Color History -->
+        <section class="reveal reveal-delay-3 mb-10">
+            <div class="color-card" style="border-radius:16px;padding:20px 24px;">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-display text-base font-semibold" style="color:var(--fg);">
+                        <i class="fa-solid fa-clock-rotate-left mr-2" style="color:var(--accent);"></i>Mix History
+                    </h2>
+                    <button onclick="clearHistory()" class="copy-btn" style="font-size:11px;"><i class="fa-solid fa-trash mr-1"></i>Clear</button>
+                </div>
+                <div id="historyStrip" class="history-strip">
+                    <span style="font-size:12px;color:var(--muted);">Mix some colors — they'll appear here.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Formula Explanation  -->
+        <section class="reveal reveal-delay-3 mb-10">
+            <div class="section-header-row flex items-center justify-between gap-4 mb-4">
+                <h2 class="font-display text-lg font-semibold" style="color:var(--fg);">Calculation Explanation</h2>
+                <div class="term-toggle-wrap">
+                    <span class="term-badge" id="termBadge">EXACT</span>
+                    <div class="term-toggle" role="radiogroup" aria-label="Terminology level">
+                        <button class="term-btn" id="termEveryday" role="radio" aria-checked="false" onclick="setTerminology('everyday')">
+                            <i class="fa-solid fa-user mr-1"></i>Everyday
+                        </button>
+                        <button class="term-btn active" id="termTechnical" role="radio" aria-checked="true" onclick="setTerminology('technical')">
+                            <i class="fa-solid fa-flask mr-1"></i>Technical
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="formulaContent"></div>
+            <div class="formula-block mt-4">
+                <div class="mb-2" style="color:var(--accent);font-weight:700;">RGB &harr; CMYK Conversion (Reference)</div>
+                <div><span class="cm">// RGB to CMYK</span></div>
+                <div>K = 1 - max(R/255, G/255, B/255)</div>
+                <div>C = (1 - R/255 - K) / (1 - K)</div>
+                <div>M = (1 - G/255 - K) / (1 - K)</div>
+                <div>Y = (1 - B/255 - K) / (1 - K)</div>
+                <div class="mt-2"><span class="cm">// CMYK to RGB</span></div>
+                <div>R = 255 &times; (1 - C) &times; (1 - K)</div>
+                <div>G = 255 &times; (1 - M) &times; (1 - K)</div>
+                <div>B = 255 &times; (1 - Y) &times; (1 - K)</div>
+            </div>
+        </section>
+		<!-- Privacy Modal -->
+		<div id="privacyModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);align-items:center;justify-content:center;" onclick="if(event.target===this)closePrivacy()">
+			<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;padding:32px 28px;position:relative;">
+				<button onclick="closePrivacy()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+				<h2 class="font-display text-xl font-bold mb-4" style="color:var(--fg);">Privacy Policy</h2>
+				<div style="color:var(--muted);font-size:13px;line-height:1.8;">
+					<p class="mb-3"><strong style="color:var(--fg);">ChromaFuse</strong> is a client-side tool. All calculations and color processing happen entirely in your browser.</p>
+					<p class="mb-3"><strong style="color:var(--fg);">No data collection.</strong> We do not collect, store, transmit, or share any personal information, color choices, or usage data.</p>
+					<p class="mb-3"><strong style="color:var(--fg);">No cookies.</strong> This site uses <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px;">localStorage</code> only to remember your light/dark theme preference. No tracking cookies are used.</p>
+					<p class="mb-3"><strong style="color:var(--fg);">No third-party services.</strong> This site loads fonts and icons from CDNs (Google Fonts, Font Awesome). These services may log standard HTTP requests per their own policies.</p>
+					<p><strong style="color:var(--fg);">No analytics.</strong> We do not use Google Analytics, Meta Pixel, or any tracking scripts.</p>
+					<p class="mt-4" style="opacity:0.6;font-size:11px;">Last updated: May 2026</p>
+				</div>
+			</div>
+		</div>
+		<!-- Footer Section -->
+		<footer class="text-center py-8" style="color:var(--muted);font-size:12px;border-top:1px solid var(--border);">
+			<div class="mb-3">
+				<span class="font-display font-semibold" style="color:var(--fg);">Chroma<span style="color:var(--accent);">Fuse</span></span>
+			</div>
+			<div class="mb-2">Free interactive color mixing lab — additive & subtractive</div>
+			<div class="mb-3" style="font-size:11px;">All calculations run locally in your browser. No data is collected or sent to any server.</div>
+			<div class="flex flex-wrap items-center justify-center gap-4 mb-4" style="font-size:11px;">
+				<a href="https://github.com" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='var(--muted)'"><i class="fa-brands fa-github mr-1"></i>Source</a>
+				<span style="opacity:0.3;">|</span>
+				<a href="mailto:contact@chromafuse.app" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='var(--muted)'"><i class="fa-solid fa-envelope mr-1"></i>Contact</a>
+				<span style="opacity:0.3;">|</span>
+				<a href="javascript:void(0)" onclick="openPrivacy()" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='var(--muted)'"><i class="fa-solid fa-shield-halved mr-1"></i>Privacy</a>
+			</div>
+			<div style="font-size:11px;opacity:0.7;">
+				&copy; <span id="footerYear">2026</span> ChromaFuse. Built with HTML · CSS · JS.
+			</div>
+		</footer>
+    </div>
+
+<script>
+/*
+ * Copyright (c) 2026 jeyaprathap-LSA-01. All Rights Reserved.
+ *
+ * This source code is proprietary and for portfolio purposes only.
+ * Unauthorized commercial use, modification, distribution, or sublicensing
+ * is strictly prohibited without explicit written permission from the author.
+ *
+ * See the LICENSE file in the root directory for full terms.
+ */
+    // ========================
+    // STATE
+    // ========================
+    let currentMode = 'digital';
+    let resultRGB = { r: 128, g: 83, b: 128 };
+    let isUpdating = false;
+    let pigmentIntensity = 0.50;
+    let termMode = 'technical';
+    const SNAP_POINTS = [0, 50, 100];
+    const SNAP_THRESHOLD = 0.5;
+    let colorHistory = [];
+    let historyTimer = null;	
+
+    // ========================
+    // THEME TOGGLE
+    // ========================
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        localStorage.setItem('chromafuse-theme', isDark ? 'light' : 'dark');
+        drawVenn();
+        showToast(isDark ? 'Light mode' : 'Dark mode');
+    }
+    function initTheme() {
+        const saved = localStorage.getItem('chromafuse-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', saved);
+        document.getElementById('themeIcon').className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+
+    // ========================
+    // TERMINOLOGY 
+    // ========================
+    const TERMS = {
+        everyday: {
+            digitalTitle: "Screen / Light Mixing",
+            paintTitle: "Paint Mixing",
+            subtractiveLabel: "Paint Blocking (Stacked Layers)",
+            additiveLabel: "Screen / Light (Average)",
+            blendLabel: "Blend (Strength = ",
+            intensityWord: "Strength",
+            subVar: "R_paint",
+            addVar: "R_screen",
+            sliderLabel: "Paint Strength",
+            sliderDesc: "How strongly paint blocks light",
+            snap0: "Screen-like",
+            snap50: "Realistic",
+            snap100: "Perfect paint",
+            modeInfoDigital: "Digital mode: Colors are averaged (screen mixing) — like mixing light on a screen.",
+            modeInfoPaint: "Paint mode: Colors are blended (paint mixing) — like mixing physical paint together.",
+            digitalDesc: "Each color part is <strong style='color:var(--fg)'>averaged</strong> independently. This is how screens mix colored light — more light means brighter colors. Two half-bright lights combine into full brightness.",
+            step1Desc: "Each paint layer blocks some light. When stacked, even more light gets blocked — the second layer can only block what the first layer left behind.",
+            step2Desc: "Simple averaging — how screens mix colored light.",
+            step3Desc: "Real paint isn't perfect — some light bounces off the surface instead of getting blocked. The blend mixes both approaches proportionally.",
+            edge0: "Strength = 0.00 means pure screen/light mixing — same as Digital mode. No paint blocking happens.",
+            edge1: "Strength = 1.00 means pure paint mixing — perfect paint with no light bouncing off the top. Opposite colors make black because each color blocks what the other lets through.",
+            edgeMid: "At strength {I}, the result is {pctSub}% paint blocking and {pctAdd}% screen mixing — modeling real thick paint where some light still bounces around.",
+            combinedRef: "Combined light blocked = stacking both layers",
+        },
+        technical: {
+            digitalTitle: "Digital (RGB Additive Mixing)",
+            paintTitle: "Paint (Subtractive Mixing)",
+            subtractiveLabel: "Subtractive (Multiplicative Reflectance)",
+            additiveLabel: "Additive (Average)",
+            blendLabel: "Blend (Intensity = ",
+            intensityWord: "Intensity",
+            subVar: "R_sub",
+            addVar: "R_add",
+            sliderLabel: "Pigment Intensity",
+            sliderDesc: "How strongly pigments absorb light",
+            snap0: "Light-like",
+            snap50: "Balanced",
+            snap100: "Ideal pigment",
+            modeInfoDigital: "Digital mode: Colors are averaged (additive mixing) — like mixing light on a screen.",
+            modeInfoPaint: "Paint mode: Reflectances are blended (subtractive mixing) — like mixing physical pigments.",
+            digitalDesc: "Each channel is <strong style='color:var(--fg)'>averaged</strong> independently. This models how light combines on a screen — more light means brighter results. Two half-intensity lights add up to full intensity.",
+            step1Desc: "Each pigment absorbs light. Combined reflectance = product of individual reflectances.",
+            step2Desc: "Simple channel averaging — models light mixing on a screen.",
+            step3Desc: "Real pigments scatter light and aren't perfect absorbers. The blend combines subtractive and additive proportionally.",
+            edge0: "Intensity = 0.00 means purely additive mixing — same as Digital mode. No pigment absorption is simulated.",
+            edge1: "Intensity = 1.00 means purely subtractive (multiplicative) mixing — ideal pigments with no surface reflection. Complementary colors will produce black because each absorbs what the other reflects.",
+            edgeMid: "At intensity {I}, the result is {pctSub}% subtractive and {pctAdd}% additive — modeling real opaque paint that partially scatters light.",
+            combinedRef: "Combined reflectance = product of individual reflectances",
+        }
+    };
+    function T(key) { return TERMS[termMode][key] || key; }
+
+    function setTerminology(mode) {
+        termMode = mode;
+        document.getElementById('termEveryday').classList.toggle('active', mode === 'everyday');
+        document.getElementById('termTechnical').classList.toggle('active', mode === 'technical');
+        document.getElementById('termEveryday').setAttribute('aria-checked', mode === 'everyday');
+        document.getElementById('termTechnical').setAttribute('aria-checked', mode === 'technical');
+        document.getElementById('termBadge').textContent = mode === 'everyday' ? 'SIMPLE' : 'EXACT';
+        document.getElementById('sliderLabel').textContent = T('sliderLabel');
+        document.getElementById('sliderDesc').textContent = T('sliderDesc');
+        document.getElementById('snapText0').textContent = T('snap0');
+        document.getElementById('snapText50').textContent = T('snap50');
+        document.getElementById('snapText100').textContent = T('snap100');
+        updateModeInfoText();
+        updateFormulaDisplay();
+        const fc = document.getElementById('formulaContent');
+        fc.classList.remove('term-changed'); void fc.offsetWidth; fc.classList.add('term-changed');
+        showToast(mode === 'everyday' ? 'Everyday terms — simpler language' : 'Technical terms — precise language');
+    }
+    function updateModeInfoText() {
+        document.getElementById('modeInfoText').textContent = currentMode === 'digital' ? T('modeInfoDigital') : T('modeInfoPaint');
+    }
+
+    // ========================
+    // COLOR MATH
+    // ========================
+    function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+    function rgbToHex(r, g, b) { return '#' + [r,g,b].map(v => clamp(Math.round(v),0,255).toString(16).padStart(2,'0')).join('').toUpperCase(); }
+    function hexToRgb(hex) {
+        hex = hex.replace('#','');
+        if (hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+        if (hex.length !== 6) return null;
+        const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+        if (isNaN(r)||isNaN(g)||isNaN(b)) return null;
+        return {r:clamp(r,0,255),g:clamp(g,0,255),b:clamp(b,0,255)};
+    }
+    function rgbToCmyk(r,g,b) {
+        const rp=r/255,gp=g/255,bp=b/255;
+        const k=1-Math.max(rp,gp,bp);
+        if(k>=1) return {c:0,m:0,y:0,k:100};
+        return {c:Math.round(clamp(((1-rp-k)/(1-k))*100,0,100)),m:Math.round(clamp(((1-gp-k)/(1-k))*100,0,100)),y:Math.round(clamp(((1-bp-k)/(1-k))*100,0,100)),k:Math.round(clamp(k*100,0,100))};
+    }
+    function cmykToRgb(c,m,y,k) {
+        const kp=k/100,cp=c/100,mp=m/100,yp=y/100;
+        return {r:clamp(Math.round(255*(1-cp)*(1-kp)),0,255),g:clamp(Math.round(255*(1-mp)*(1-kp)),0,255),b:clamp(Math.round(255*(1-yp)*(1-kp)),0,255)};
+    }
+    function rgbToHsl(r,g,b) {
+        r/=255; g/=255; b/=255;
+        const max=Math.max(r,g,b),min=Math.min(r,g,b);
+        let h,s,l=(max+min)/2;
+        if(max===min){h=s=0;}else{
+            const d=max-min; s=l>0.5?d/(2-max-min):d/(max+min);
+            switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}
+        }
+        return {h:Math.round(h*360),s:Math.round(s*100),l:Math.round(l*100)};
+    }
+    function getLuminance(r,g,b) { return (0.299*r+0.587*g+0.114*b)/255; }
+    function sRGB(c) { c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }
+    function relativeLuminance(r,g,b) { return 0.2126*sRGB(r)+0.7152*sRGB(g)+0.0722*sRGB(b); }
+    function contrastRatio(r1,g1,b1,r2,g2,b2) {
+        const l1=relativeLuminance(r1,g1,b1), l2=relativeLuminance(r2,g2,b2);
+        const lighter=Math.max(l1,l2), darker=Math.min(l1,l2);
+        return (lighter+0.05)/(darker+0.05);
+    }
+
+    // ========================
+    // MIXING
+    // ========================
+    function mixAdditive(r1,g1,b1,r2,g2,b2){return{r:Math.round((r1+r2)/2),g:Math.round((g1+g2)/2),b:Math.round((b1+b2)/2)};}
+    function mixSubtractivePure(r1,g1,b1,r2,g2,b2){return{r:Math.round((r1/255)*(r2/255)*255),g:Math.round((g1/255)*(g2/255)*255),b:Math.round((b1/255)*(b2/255)*255)};}
+    function mixSubtractiveBlended(r1,g1,b1,r2,g2,b2,intensity){
+        const sub=mixSubtractivePure(r1,g1,b1,r2,g2,b2),add=mixAdditive(r1,g1,b1,r2,g2,b2);
+        return{r:Math.round(sub.r*intensity+add.r*(1-intensity)),g:Math.round(sub.g*intensity+add.g*(1-intensity)),b:Math.round(sub.b*intensity+add.b*(1-intensity))};
+    }
+
+    // ========================
+    // SLIDER
+    // ========================
+    function findNearestSnap(val){let nearest=null,minDist=SNAP_THRESHOLD+1;for(const sp of SNAP_POINTS){const d=Math.abs(val-sp);if(d<minDist){minDist=d;nearest=sp;}}return minDist<=SNAP_THRESHOLD?nearest:null;}
+    function updateSnapVisuals(val){const snapped=findNearestSnap(val),slider=document.getElementById('intensitySlider');['0','50','100'].forEach(sp=>{const dot=document.getElementById('snapDot'+sp),label=document.getElementById('snapLabel'+sp),isActive=snapped!==null&&parseInt(sp)===snapped;dot.classList.toggle('active',isActive);label.classList.toggle('active',isActive);});slider.classList.toggle('snapped',snapped!==null);}
+    function onIntensityInput(){const val=parseInt(document.getElementById('intensitySlider').value);updateSnapVisuals(val);pigmentIntensity=val/100;document.getElementById('intensityValue').textContent=pigmentIntensity.toFixed(2);recalculate();}
+    function onIntensityChange(){const slider=document.getElementById('intensitySlider');let val=parseInt(slider.value);const snap=findNearestSnap(val);if(snap!==null){val=snap;slider.value=val;updateSnapVisuals(val);}pigmentIntensity=val/100;document.getElementById('intensityValue').textContent=pigmentIntensity.toFixed(2);recalculate();}
+    function snapTo(val){document.getElementById('intensitySlider').value=val;pigmentIntensity=val/100;document.getElementById('intensityValue').textContent=pigmentIntensity.toFixed(2);updateSnapVisuals(val);recalculate();}
+
+    // ========================
+    // GETTERS
+    // ========================
+    function getColor1(){return{r:parseInt(document.getElementById('r1').value)||0,g:parseInt(document.getElementById('g1').value)||0,b:parseInt(document.getElementById('b1').value)||0};}
+    function getColor2(){return{r:parseInt(document.getElementById('r2').value)||0,g:parseInt(document.getElementById('g2').value)||0,b:parseInt(document.getElementById('b2').value)||0};}
+
+    // ========================
+    // RECALCULATE
+    // ========================
+    function recalculate() {
+        if(isUpdating) return;
+        const c1=getColor1(), c2=getColor2();
+        let mixed;
+        if(currentMode==='digital'){mixed=mixAdditive(clamp(c1.r,0,255),clamp(c1.g,0,255),clamp(c1.b,0,255),clamp(c2.r,0,255),clamp(c2.g,0,255),clamp(c2.b,0,255));}
+        else{mixed=mixSubtractiveBlended(clamp(c1.r,0,255),clamp(c1.g,0,255),clamp(c1.b,0,255),clamp(c2.r,0,255),clamp(c2.g,0,255),clamp(c2.b,0,255),pigmentIntensity);}
+        resultRGB=mixed;
+        updateResultDisplay();
+        updateFormulaDisplay();
+        drawVenn();
+        updateCardAccents();
+        updateHSL();
+        updateContrast();
+        updatePalettes();
+        scheduleHistoryAdd();
+    }
+
+    function updateResultDisplay(){
+        const{r,g,b}=resultRGB, hex=rgbToHex(r,g,b), cmyk=rgbToCmyk(r,g,b);
+        document.getElementById('resultCircle').style.backgroundColor=`rgb(${r},${g},${b})`;
+        document.getElementById('resultGlow').style.backgroundColor=`rgb(${r},${g},${b})`;
+        document.getElementById('resultHex').value=hex;
+        document.getElementById('rr').value=r; document.getElementById('rg').value=g; document.getElementById('rb').value=b;
+        document.getElementById('rc').value=cmyk.c; document.getElementById('rm').value=cmyk.m; document.getElementById('ry').value=cmyk.y; document.getElementById('rk').value=cmyk.k;
+        const circle=document.getElementById('resultCircle');
+        circle.classList.remove('result-pulse-anim'); void circle.offsetWidth; circle.classList.add('result-pulse-anim');
+    }
+
+    // ========================
+    // HSL UPDATE
+    // ========================
+    function updateHSL() {
+        const c1=getColor1(), c2=getColor2(), cr=resultRGB;
+        const h1=rgbToHsl(c1.r,c1.g,c1.b), h2=rgbToHsl(c2.r,c2.g,c2.b), hr=rgbToHsl(cr.r,cr.g,cr.b);
+        document.getElementById('hsl1').textContent=`hsl(${h1.h}\u00B0, ${h1.s}%, ${h1.l}%)`;
+        document.getElementById('hsl2').textContent=`hsl(${h2.h}\u00B0, ${h2.s}%, ${h2.l}%)`;
+        document.getElementById('hslResult').textContent=`hsl(${hr.h}\u00B0, ${hr.s}%, ${hr.l}%)`;
+    }
+
+    // ========================
+    // CONTRAST CHECKER
+    // ========================
+    function updateContrast() {
+        const c1=getColor1(), c2=getColor2();
+        const ratio=contrastRatio(c1.r,c1.g,c1.b,c2.r,c2.g,c2.b);
+        document.getElementById('contrastRatio').textContent=ratio.toFixed(2)+':1';
+        const aa=ratio>=4.5, aaa=ratio>=7;
+        const aaEl=document.getElementById('contrastAA'), aaaEl=document.getElementById('contrastAAA');
+        aaEl.className='contrast-badge '+(aa?'pass':'fail');
+        aaEl.innerHTML=(aa?'<i class="fa-solid fa-check mr-1"></i>':'<i class="fa-solid fa-xmark mr-1"></i>')+'AA';
+        aaaEl.className='contrast-badge '+(aaa?'pass':'fail');
+        aaaEl.innerHTML=(aaa?'<i class="fa-solid fa-check mr-1"></i>':'<i class="fa-solid fa-xmark mr-1"></i>')+'AAA';
+        const lum=getLuminance(c1.r,c1.g,c1.b);
+        const hex1=rgbToHex(c1.r,c1.g,c1.b);
+        document.getElementById('contrastPreview').style.backgroundColor=hex1;
+        document.getElementById('contrastPreview').style.color=lum>0.4?'#111':'#fff';
+    }
+
+    // ========================
+    // PALETTE GENERATOR
+    // ========================
+    function makeSwatch(hex, container) {
+        const el=document.createElement('div');
+        el.className='palette-swatch';
+        el.style.backgroundColor=hex;
+        el.title=hex;
+        const lum = getLuminance(...hexToRgb(hex).r ? [hexToRgb(hex).r,hexToRgb(hex).g,hexToRgb(hex).b] : [128,128,128]);
+        el.innerHTML=`<div class="swatch-label" style="background:rgba(0,0,0,0.55);color:#fff;">${hex}</div>`;
+        el.onclick=()=>{navigator.clipboard.writeText(hex).then(()=>showToast('Copied '+hex));};
+        container.appendChild(el);
+    }
+    function updatePalettes() {
+        const c1=getColor1(), c2=getColor2();
+        const t=document.getElementById('tintsPalette1'), s=document.getElementById('shadesPalette1'), m=document.getElementById('mixGradient');
+        t.innerHTML=''; s.innerHTML=''; m.innerHTML='';
+        [0.9,0.7,0.5,0.3,0.1].forEach(f=>{
+            const r=Math.round(c1.r*f+255*(1-f)), g=Math.round(c1.g*f+255*(1-f)), b=Math.round(c1.b*f+255*(1-f));
+            makeSwatch(rgbToHex(r,g,b), t);
+        });
+        [0.9,0.7,0.5,0.3,0.1].forEach(f=>{
+            const r=Math.round(c1.r*f), g=Math.round(c1.g*f), b=Math.round(c1.b*f);
+            makeSwatch(rgbToHex(r,g,b), s);
+        });
+        [0,1/6,2/6,3/6,4/6,5/6,1].forEach(f=>{
+            const r=Math.round(c1.r*(1-f)+c2.r*f), g=Math.round(c1.g*(1-f)+c2.g*f), b=Math.round(c1.b*(1-f)+c2.b*f);
+            makeSwatch(rgbToHex(r,g,b), m);
+        });
+    }
+    function regeneratePalettes() { updatePalettes(); showToast('Palettes refreshed'); }
+
+    // ========================
+    // COLOR HISTORY
+    // ========================
+    function scheduleHistoryAdd() {
+        clearTimeout(historyTimer);
+        historyTimer = setTimeout(() => {
+            const hex = rgbToHex(resultRGB.r, resultRGB.g, resultRGB.b);
+            if (colorHistory.length > 0 && colorHistory[colorHistory.length - 1] === hex) return;
+            colorHistory.push(hex);
+            if (colorHistory.length > 24) colorHistory.shift();
+            renderHistory();
+        }, 600);
+    }
+    function renderHistory() {
+        const strip=document.getElementById('historyStrip');
+        strip.innerHTML='';
+        if(colorHistory.length===0){strip.innerHTML='<span style="font-size:12px;color:var(--muted);">Mix some colors — they\'ll appear here.</span>';return;}
+        colorHistory.slice().reverse().forEach(hex=>{
+            const sw=document.createElement('div');
+            sw.className='history-swatch';
+            sw.style.backgroundColor=hex;
+            sw.title=hex;
+            sw.onclick=()=>{
+                const rgb=hexToRgb(hex);
+                if(!rgb) return;
+                document.getElementById('color1').value=hex;
+                document.getElementById('hex1').value=hex;
+                document.getElementById('r1').value=rgb.r;
+                document.getElementById('g1').value=rgb.g;
+                document.getElementById('b1').value=rgb.b;
+                recalculate();
+                showToast('Loaded '+hex+' as Color 1');
+            };
+            strip.appendChild(sw);
+        });
+    }
+    function clearHistory(){colorHistory=[];renderHistory();showToast('History cleared');}
+
+    // ========================
+    // COPY ALL FORMATS
+    // ========================
+    function copyAllFormats(){
+        const hex=document.getElementById('resultHex').value;
+        const r=document.getElementById('rr').value,g=document.getElementById('rg').value,b=document.getElementById('rb').value;
+        const c=document.getElementById('rc').value,m=document.getElementById('rm').value,y=document.getElementById('ry').value,k=document.getElementById('rk').value;
+        const hsl=document.getElementById('hslResult').textContent;
+        const text=`HEX: ${hex}\nRGB: rgb(${r}, ${g}, ${b})\nCMYK: cmyk(${c}%, ${m}%, ${y}%, ${k}%)\nHSL: ${hsl}`;
+        navigator.clipboard.writeText(text).then(()=>showToast('All formats copied!'));
+    }
+
+    // ========================
+    // INPUT HANDLERS
+    // ========================
+    function onColorChange(){
+        if(isUpdating) return; isUpdating=true;
+        const c1=hexToRgb(document.getElementById('color1').value), c2=hexToRgb(document.getElementById('color2').value);
+        if(c1){document.getElementById('hex1').value=document.getElementById('color1').value.toUpperCase();document.getElementById('r1').value=c1.r;document.getElementById('g1').value=c1.g;document.getElementById('b1').value=c1.b;}
+        if(c2){document.getElementById('hex2').value=document.getElementById('color2').value.toUpperCase();document.getElementById('r2').value=c2.r;document.getElementById('g2').value=c2.g;document.getElementById('b2').value=c2.b;}
+        isUpdating=false; recalculate();
+    }
+    function onRGBInput(which){
+        if(isUpdating) return; isUpdating=true;
+        const r=clamp(parseInt(document.getElementById('r'+which).value)||0,0,255);
+        const g=clamp(parseInt(document.getElementById('g'+which).value)||0,0,255);
+        const b=clamp(parseInt(document.getElementById('b'+which).value)||0,0,255);
+        const hex=rgbToHex(r,g,b);
+        document.getElementById('hex'+which).value=hex; document.getElementById('color'+which).value=hex;
+        isUpdating=false; recalculate();
+    }
+    function onHexInput(which){
+        if(isUpdating) return;
+        const hexEl=document.getElementById('hex'+which);
+        let val=hexEl.value.trim(); if(!val.startsWith('#')) val='#'+val;
+        const rgb=hexToRgb(val);
+        if(!rgb){hexEl.classList.add('invalid');return;} hexEl.classList.remove('invalid');
+        isUpdating=true;
+        document.getElementById('r'+which).value=rgb.r; document.getElementById('g'+which).value=rgb.g; document.getElementById('b'+which).value=rgb.b;
+        document.getElementById('color'+which).value=rgbToHex(rgb.r,rgb.g,rgb.b);
+        isUpdating=false; recalculate();
+    }
+    function onResultRGBInput(){
+        if(isUpdating) return; isUpdating=true;
+        const r=clamp(parseInt(document.getElementById('rr').value)||0,0,255);
+        const g=clamp(parseInt(document.getElementById('rg').value)||0,0,255);
+        const b=clamp(parseInt(document.getElementById('rb').value)||0,0,255);
+        resultRGB={r,g,b};
+        const cmyk=rgbToCmyk(r,g,b);
+        document.getElementById('resultHex').value=rgbToHex(r,g,b);
+        document.getElementById('rc').value=cmyk.c; document.getElementById('rm').value=cmyk.m; document.getElementById('ry').value=cmyk.y; document.getElementById('rk').value=cmyk.k;
+        document.getElementById('resultCircle').style.backgroundColor=`rgb(${r},${g},${b})`;
+        document.getElementById('resultGlow').style.backgroundColor=`rgb(${r},${g},${b})`;
+        isUpdating=false; updateFormulaDisplay(); drawVenn(); updateHSL();
+    }
+    function onResultHexInput(){
+        if(isUpdating) return;
+        const hexEl=document.getElementById('resultHex');
+        let val=hexEl.value.trim(); if(!val.startsWith('#')) val='#'+val;
+        const rgb=hexToRgb(val);
+        if(!rgb){hexEl.classList.add('invalid');return;} hexEl.classList.remove('invalid');
+        isUpdating=true; resultRGB=rgb;
+        const cmyk=rgbToCmyk(rgb.r,rgb.g,rgb.b);
+        document.getElementById('rr').value=rgb.r; document.getElementById('rg').value=rgb.g; document.getElementById('rb').value=rgb.b;
+        document.getElementById('rc').value=cmyk.c; document.getElementById('rm').value=cmyk.m; document.getElementById('ry').value=cmyk.y; document.getElementById('rk').value=cmyk.k;
+        document.getElementById('resultCircle').style.backgroundColor=`rgb(${rgb.r},${rgb.g},${rgb.b})`;
+        document.getElementById('resultGlow').style.backgroundColor=`rgb(${rgb.r},${rgb.g},${rgb.b})`;
+        const _rc=document.getElementById('resultCircle'); _rc.classList.remove('result-pulse-anim'); void _rc.offsetWidth; _rc.classList.add('result-pulse-anim');
+        isUpdating=false; updateFormulaDisplay(); drawVenn(); updateHSL();
+    }
+    function onResultCMYKInput(){
+        if(isUpdating) return; isUpdating=true;
+        const c=clamp(parseInt(document.getElementById('rc').value)||0,0,100);
+        const m=clamp(parseInt(document.getElementById('rm').value)||0,0,100);
+        const y=clamp(parseInt(document.getElementById('ry').value)||0,0,100);
+        const k=clamp(parseInt(document.getElementById('rk').value)||0,0,100);
+        const rgb=cmykToRgb(c,m,y,k); resultRGB=rgb;
+        document.getElementById('resultHex').value=rgbToHex(rgb.r,rgb.g,rgb.b);
+        document.getElementById('rr').value=rgb.r; document.getElementById('rg').value=rgb.g; document.getElementById('rb').value=rgb.b;
+        document.getElementById('resultCircle').style.backgroundColor=`rgb(${rgb.r},${rgb.g},${rgb.b})`;
+        document.getElementById('resultGlow').style.backgroundColor=`rgb(${rgb.r},${rgb.g},${rgb.b})`;
+        isUpdating=false; updateFormulaDisplay(); drawVenn(); updateHSL();
+    }
+
+    // ========================
+    // MODE
+    // ========================
+    function setMode(mode){
+        currentMode=mode;
+        document.getElementById('btnDigital').classList.toggle('active',mode==='digital');
+        document.getElementById('btnPaint').classList.toggle('active',mode==='paint');
+        document.getElementById('btnDigital').setAttribute('aria-checked',mode==='digital');
+        document.getElementById('btnPaint').setAttribute('aria-checked',mode==='paint');
+        const slider=document.getElementById('sliderContainer');
+        mode==='paint' ? slider.classList.remove('hidden-slider') : slider.classList.add('hidden-slider');
+        updateModeInfoText(); recalculate();
+    }
+
+    // ========================
+    // ACTIONS
+    // ========================
+    function swapColors(){
+        if(isUpdating) return; isUpdating=true;
+        const fields=['hex','r','g','b'];
+        const v1=fields.map(f=>document.getElementById(f+'1').value);
+        const v2=fields.map(f=>document.getElementById(f+'2').value);
+        fields.forEach((f,i)=>{document.getElementById(f+'1').value=v2[i];document.getElementById(f+'2').value=v1[i];});
+        document.getElementById('color1').value=v2[0]; document.getElementById('color2').value=v1[0];
+        isUpdating=false; recalculate(); showToast('Colors swapped');
+    }
+    function randomColors(){
+        if(isUpdating) return; isUpdating=true;
+        const rh=()=>'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0').toUpperCase();
+        const h1=rh(),h2=rh(),c1=hexToRgb(h1),c2=hexToRgb(h2);
+        document.getElementById('color1').value=h1; document.getElementById('hex1').value=h1;
+        document.getElementById('r1').value=c1.r; document.getElementById('g1').value=c1.g; document.getElementById('b1').value=c1.b;
+        document.getElementById('color2').value=h2; document.getElementById('hex2').value=h2;
+        document.getElementById('r2').value=c2.r; document.getElementById('g2').value=c2.g; document.getElementById('b2').value=c2.b;
+        isUpdating=false; recalculate(); showToast('Random colors generated');
+    }
+    function resetColors(){
+        if(isUpdating) return; isUpdating=true;
+        document.getElementById('color1').value='#FFA500'; document.getElementById('hex1').value='#FFA500';
+        document.getElementById('r1').value=255; document.getElementById('g1').value=165; document.getElementById('b1').value=0;
+        document.getElementById('color2').value='#0000FF'; document.getElementById('hex2').value='#0000FF';
+        document.getElementById('r2').value=0; document.getElementById('g2').value=0; document.getElementById('b2').value=255;
+        isUpdating=false; recalculate(); showToast('Reset to default');
+    }
+
+    // ========================
+    // COPY
+    // ========================
+    function copyResultHex(){const hex=document.getElementById('resultHex').value;navigator.clipboard.writeText(hex).then(()=>showToast('Copied '+hex));}
+    function copyResultRGB(){const t=`rgb(${document.getElementById('rr').value}, ${document.getElementById('rg').value}, ${document.getElementById('rb').value})`;navigator.clipboard.writeText(t).then(()=>showToast('Copied '+t));}
+    function copyResultCMYK(){const t=`cmyk(${document.getElementById('rc').value}%, ${document.getElementById('rm').value}%, ${document.getElementById('ry').value}%, ${document.getElementById('rk').value}%)`;navigator.clipboard.writeText(t).then(()=>showToast('Copied '+t));}
+
+    // ========================
+    // TOAST
+    // ========================
+    function showToast(message){
+        const container=document.getElementById('toastContainer');
+        const toast=document.createElement('div');
+        toast.className='toast';
+        toast.innerHTML=`<i class="fa-solid fa-check-circle"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.add('show')));
+        setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),350);},2200);
+    }
+
+    // =================================================================
+    // FORMULA DISPLAY 
+    // =================================================================
+
+    function updateFormulaDisplay(){
+        const c1=getColor1(),c2=getColor2();
+        const r1=clamp(c1.r,0,255),g1=clamp(c1.g,0,255),b1=clamp(c1.b,0,255);
+        const r2=clamp(c2.r,0,255),g2=clamp(c2.g,0,255),b2=clamp(c2.b,0,255);
+        const hex1=rgbToHex(r1,g1,b1),hex2=rgbToHex(r2,g2,b2);
+        const container=document.getElementById('formulaContent');
+        if(currentMode==='digital'){container.innerHTML=buildDigitalFormula(r1,g1,b1,r2,g2,b2,hex1,hex2);}
+        else{container.innerHTML=buildPaintFormula(r1,g1,b1,r2,g2,b2,hex1,hex2);}
+    }
+
+    function buildDigitalFormula(r1,g1,b1,r2,g2,b2,hex1,hex2){
+        const addR=(r1+r2)/2,addG=(g1+g2)/2,addB=(b1+b2)/2;
+        const resR=Math.round(addR),resG=Math.round(addG),resB=Math.round(addB),resHex=rgbToHex(resR,resG,resB);
+
+        return `
+        <div class="formula-block">
+            <div class="mb-2" style="color:var(--accent);font-weight:700;">${T('digitalTitle')}</div>
+            <div style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7;margin-bottom:12px;">
+                ${T('digitalDesc')}
+            </div>
+
+            <div class="mb-3" style="padding:10px 14px;border-radius:8px;background:var(--formula-info-bg);border:1px solid var(--border);">
+                <span class="color-chip" style="background:${hex1};"></span>
+                <strong>Color 1</strong> = RGB(<span class="val">${r1}</span>, <span class="val">${g1}</span>, <span class="val">${b1}</span>) = <span class="val">${hex1}</span>
+                <br>
+                <span class="color-chip" style="background:${hex2};"></span>
+                <strong>Color 2</strong> = RGB(<span class="val">${r2}</span>, <span class="val">${g2}</span>, <span class="val">${b2}</span>) = <span class="val">${hex2}</span>
+            </div>
+
+            <div class="mb-1" style="color:var(--fg);font-weight:600;">Formula:</div>
+            <div><span class="hl">R_mix</span> = (R1 + R2) / 2</div>
+            <div><span class="hl">G_mix</span> = (G1 + G2) / 2</div>
+            <div><span class="hl">B_mix</span> = (B1 + B2) / 2</div>
+
+            <div class="mt-3 mb-1" style="color:var(--fg);font-weight:600;">Calculation:</div>
+            <div><span class="hl">R_mix</span> = (${r1} + ${r2}) / 2 = ${r1+r2} / 2 = <span class="res">${addR % 1 === 0 ? addR : addR.toFixed(1)}</span> &approx; <span class="res">${resR}</span></div>
+            <div><span class="hl">G_mix</span> = (${g1} + ${g2}) / 2 = ${g1+g2} / 2 = <span class="res">${addG % 1 === 0 ? addG : addG.toFixed(1)}</span> &approx; <span class="res">${resG}</span></div>
+            <div><span class="hl">B_mix</span> = (${b1} + ${b2}) / 2 = ${b1+b2} / 2 = <span class="res">${addB % 1 === 0 ? addB : addB.toFixed(1)}</span> &approx; <span class="res">${resB}</span></div>
+
+            <div class="result-bar">
+                <div class="result-swatch" style="background:${resHex};"></div>
+                <div>
+                    <div style="font-weight:700;color:var(--accent);">Result</div>
+                    <div>RGB(<span class="res">${resR}</span>, <span class="res">${resG}</span>, <span class="res">${resB}</span>) = <span class="res">${resHex}</span></div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function buildPaintFormula(r1,g1,b1,r2,g2,b2,hex1,hex2){
+        const I=pigmentIntensity,Iinv=1-I;
+        const subR_f=(r1/255)*(r2/255),subG_f=(g1/255)*(g2/255),subB_f=(b1/255)*(b2/255);
+        const subR=Math.round(subR_f*255),subG=Math.round(subG_f*255),subB=Math.round(subB_f*255);
+        const addR=Math.round((r1+r2)/2),addG=Math.round((g1+g2)/2),addB=Math.round((b1+b2)/2);
+        const blendR=subR*I+addR*Iinv,blendG=subG*I+addG*Iinv,blendB=subB*I+addB*Iinv;
+        const resR=Math.round(blendR),resG=Math.round(blendG),resB=Math.round(blendB),resHex=rgbToHex(resR,resG,resB);
+
+        const fmtF=v=>v.toFixed(3);
+        const fmtR=v=>Math.abs(v-Math.round(v))<0.01?Math.round(v):v.toFixed(1);
+        const zeroClass=v=>v===0?'zero':'val';
+
+        const showSubtractive=I>0.001;
+        const showAdditive=I<0.999;
+
+        const subVar=T('subVar');
+        const addVar=T('addVar');
+        const iWord=T('intensityWord');
+
+        let stepsHtml='';
+
+        if(showSubtractive){
+            stepsHtml+=`
+            <div class="mb-1" style="color:var(--fg);font-weight:600;">Step 1 — ${T('subtractiveLabel')}:</div>
+            <div style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;margin-bottom:6px;">
+                ${T('step1Desc')}
+            </div>
+            <div>${subVar.charAt(0)}_sub = (R1/255) &times; (R2/255) &times; 255 = (${r1}/255) &times; (${r2}/255) &times; 255 = <span class="${zeroClass(r1)}">${fmtF(r1/255)}</span> &times; <span class="${zeroClass(r2)}">${fmtF(r2/255)}</span> &times; 255 = <span class="res">${subR}</span></div>
+            <div>${subVar.charAt(2)}_sub = (G1/255) &times; (G2/255) &times; 255 = (${g1}/255) &times; (${g2}/255) &times; 255 = <span class="${zeroClass(g1)}">${fmtF(g1/255)}</span> &times; <span class="${zeroClass(g2)}">${fmtF(g2/255)}</span> &times; 255 = <span class="res">${subG}</span></div>
+            <div>${subVar.charAt(4)}_sub = (B1/255) &times; (B2/255) &times; 255 = (${b1}/255) &times; (${b2}/255) &times; 255 = <span class="${zeroClass(b1)}">${fmtF(b1/255)}</span> &times; <span class="${zeroClass(b2)}">${fmtF(b2/255)}</span> &times; 255 = <span class="res">${subB}</span></div>
+            `;
+        }
+
+        if(showAdditive){
+            stepsHtml+=`
+            <div class="mt-3 mb-1" style="color:var(--fg);font-weight:600;">Step ${showSubtractive?'2':'1'} — ${T('additiveLabel')}:</div>
+            <div style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;margin-bottom:6px;">
+                ${T('step2Desc')}
+            </div>
+            <div>${addVar.charAt(0)}_add = (${r1} + ${r2}) / 2 = <span class="res">${addR}</span></div>
+            <div>${addVar.charAt(2)}_add = (${g1} + ${g2}) / 2 = <span class="res">${addG}</span></div>
+            <div>${addVar.charAt(4)}_add = (${b1} + ${b2}) / 2 = <span class="res">${addB}</span></div>
+            `;
+        }
+
+        if(showSubtractive&&showAdditive){
+            stepsHtml+=`
+            <div class="mt-3 mb-1" style="color:var(--fg);font-weight:600;">Step 3 — ${T('blendLabel')}<span class="hl">${I.toFixed(2)}</span>):</div>
+            <div style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;margin-bottom:6px;">
+                ${T('step3Desc')}
+            </div>
+            <div>R_mix = ${subR} &times; ${I.toFixed(2)} + ${addR} &times; ${Iinv.toFixed(2)} = ${fmtR(subR*I)} + ${fmtR(addR*Iinv)} = <span class="res">${resR}</span></div>
+            <div>G_mix = ${subG} &times; ${I.toFixed(2)} + ${addG} &times; ${Iinv.toFixed(2)} = ${fmtR(subG*I)} + ${fmtR(addG*Iinv)} = <span class="res">${resG}</span></div>
+            <div>B_mix = ${subB} &times; ${I.toFixed(2)} + ${addB} &times; ${Iinv.toFixed(2)} = ${fmtR(subB*I)} + ${fmtR(addB*Iinv)} = <span class="res">${resB}</span></div>
+            `;
+        }
+
+        let edgeNote='';
+        if(I<0.001){edgeNote=T('edge0');}
+        else if(I>0.999){edgeNote=T('edge1');}
+        else{edgeNote=T('edgeMid').replace('{I}',I.toFixed(2)).replace('{pctSub}',(I*100).toFixed(0)).replace('{pctAdd}',(Iinv*100).toFixed(0));}
+        edgeNote=`<div style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;margin-top:8px;">${edgeNote}</div>`;
+
+        return `
+        <div class="formula-block">
+            <div class="mb-2" style="color:var(--accent);font-weight:700;">${T('paintTitle')}</div>
+
+            <div class="mb-3" style="padding:10px 14px;border-radius:8px;background:var(--formula-info-bg);border:1px solid var(--border);">
+                <span class="color-chip" style="background:${hex1};"></span>
+                <strong>Color 1</strong> = RGB(<span class="val">${r1}</span>, <span class="val">${g1}</span>, <span class="val">${b1}</span>) = <span class="val">${hex1}</span>
+                <br>
+                <span class="color-chip" style="background:${hex2};"></span>
+                <strong>Color 2</strong> = RGB(<span class="val">${r2}</span>, <span class="val">${g2}</span>, <span class="val">${b2}</span>) = <span class="val">${hex2}</span>
+            </div>
+
+            <div class="mb-1" style="color:var(--fg);font-weight:600;">Formula (${iWord.toLowerCase()} = <span class="hl">${I.toFixed(2)}</span>):</div>
+            ${showSubtractive&&showAdditive?`
+            <div>R_mix = ${subVar} &times; <span class="hl">${I.toFixed(2)}</span> + ${addVar} &times; <span class="hl">${Iinv.toFixed(2)}</span></div>
+            <div>G_mix = G_sub &times; <span class="hl">${I.toFixed(2)}</span> + G_add &times; <span class="hl">${Iinv.toFixed(2)}</span></div>
+            <div>B_mix = B_sub &times; <span class="hl">${I.toFixed(2)}</span> + B_add &times; <span class="hl">${Iinv.toFixed(2)}</span></div>
+            <div class="mt-1" style="color:var(--muted);font-size:12px;">Where ${subVar} = (R1/255) &times; (R2/255) &times; 255 &nbsp;and&nbsp; ${addVar} = (R1 + R2) / 2</div>
+            `:showSubtractive?`
+            <div>R_mix = (R1/255) &times; (R2/255) &times; 255</div>
+            <div>G_mix = (G1/255) &times; (G2/255) &times; 255</div>
+            <div>B_mix = (B1/255) &times; (B2/255) &times; 255</div>
+            `:`
+            <div>R_mix = (R1 + R2) / 2</div>
+            <div>G_mix = (G1 + G2) / 2</div>
+            <div>B_mix = (B1 + B2) / 2</div>
+            `}
+
+            <div class="mt-4">${stepsHtml}</div>
+
+            ${edgeNote}
+
+            <div class="result-bar">
+                <div class="result-swatch" style="background:${resHex};"></div>
+                <div>
+                    <div style="font-weight:700;color:var(--accent);">Result</div>
+                    <div>RGB(<span class="res">${resR}</span>, <span class="res">${resG}</span>, <span class="res">${resB}</span>) = <span class="res">${resHex}</span></div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // ========================
+    // VENN DIAGRAM
+    // ========================
+    function drawVenn(){
+        const canvas=document.getElementById('vennCanvas'),ctx=canvas.getContext('2d');
+        const W=canvas.width,H=canvas.height;
+        const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle=isDark?'#131313':'#ffffff';
+        ctx.fillRect(0,0,W,H);
+        const c1=getColor1(),c2=getColor2(),mixed=resultRGB;
+        const centerX=W/2,centerY=H/2,radius=Math.max(1,Math.min(W,H)*0.32),offset=radius*0.55;
+        ctx.globalAlpha=0.7;
+        ctx.beginPath(); ctx.arc(centerX-offset,centerY,radius,0,Math.PI*2);
+        ctx.fillStyle=`rgb(${clamp(c1.r,0,255)},${clamp(c1.g,0,255)},${clamp(c1.b,0,255)})`; ctx.fill();
+        ctx.beginPath(); ctx.arc(centerX+offset,centerY,radius,0,Math.PI*2);
+        ctx.fillStyle=`rgb(${clamp(c2.r,0,255)},${clamp(c2.g,0,255)},${clamp(c2.b,0,255)})`; ctx.fill();
+        ctx.globalAlpha=0.9; ctx.save();
+        ctx.beginPath(); ctx.arc(centerX-offset,centerY,radius,0,Math.PI*2); ctx.clip();
+        ctx.beginPath(); ctx.arc(centerX+offset,centerY,radius,0,Math.PI*2);
+        ctx.fillStyle=`rgb(${clamp(mixed.r,0,255)},${clamp(mixed.g,0,255)},${clamp(mixed.b,0,255)})`; ctx.fill();
+        ctx.restore(); ctx.globalAlpha=1;
+        ctx.font='600 13px "Space Grotesk", sans-serif'; ctx.textAlign='center';
+        ctx.fillStyle=getLuminance(c1.r,c1.g,c1.b)>0.35?'#000':'#fff';
+        ctx.fillText('Color 1',centerX-offset,centerY-radius-12);
+        ctx.fillStyle=getLuminance(c2.r,c2.g,c2.b)>0.35?'#000':'#fff';
+        ctx.fillText('Color 2',centerX+offset,centerY-radius-12);
+        ctx.fillStyle=getLuminance(mixed.r,mixed.g,mixed.b)>0.15?'#000':'#fff';
+        ctx.fillText('Mixed',centerX,centerY+4);
+        ctx.font='500 11px "Space Grotesk", sans-serif'; ctx.fillStyle=isDark?'#E8A838':'#c47f0a';
+        const iWord=T('intensityWord').toLowerCase();
+        ctx.fillText(currentMode==='digital'?'ADDITIVE':'SUBTRACTIVE ('+iWord+': '+pigmentIntensity.toFixed(2)+')',centerX,H-16);
+    }
+
+    // ========================
+    // CARD ACCENTS
+    // ========================
+    function updateCardAccents(){
+        const c1=getColor1(),c2=getColor2();
+        document.getElementById('card1').style.borderTop=`3px solid rgb(${clamp(c1.r,0,255)},${clamp(c1.g,0,255)},${clamp(c1.b,0,255)})`;
+        document.getElementById('card2').style.borderTop=`3px solid rgb(${clamp(c2.r,0,255)},${clamp(c2.g,0,255)},${clamp(c2.b,0,255)})`;
+        document.getElementById('resultCard').style.borderTop=`3px solid rgb(${clamp(resultRGB.r,0,255)},${clamp(resultRGB.g,0,255)},${clamp(resultRGB.b,0,255)})`;
+    }
+
+    // ========================
+    // PARTICLES
+    // ========================
+    function createParticles(){
+        const container=document.getElementById('particles');
+        const colors=['#E8A838','#F06449','#4ECDC4','#C084FC','#F0E68C'];
+        for(let i=0;i<25;i++){
+            const p=document.createElement('div'); p.className='particle';
+            const size=Math.random()*4+2; p.style.width=size+'px'; p.style.height=size+'px';
+            p.style.left=Math.random()*100+'%';
+            p.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+            p.style.animationDuration=(Math.random()*15+12)+'s';
+            p.style.animationDelay=(Math.random()*15)+'s';
+            container.appendChild(p);
+        }
+    }
+
+    // Parallax
+    document.addEventListener('mousemove',(e)=>{
+        const circle=document.getElementById('resultCircle'); if(!circle) return;
+        const rect=circle.getBoundingClientRect();
+        const dx=(e.clientX-rect.left-rect.width/2)/40, dy=(e.clientY-rect.top-rect.height/2)/40;
+        circle.style.transform=`translate(${dx}px, ${dy}px)`;
+    });
+	
+	// ========================
+    // PRIVACY MODEL
+    // ========================
+	function openPrivacy() {
+		const m = document.getElementById('privacyModal');
+		m.style.display = 'flex';
+		document.body.style.overflow = 'hidden';
+		}
+		function closePrivacy() {
+			document.getElementById('privacyModal').style.display = 'none';
+			document.body.style.overflow = '';
+		}
+
+    // ========================
+    // INIT
+    // ========================
+    window.addEventListener('DOMContentLoaded',()=>{
+        initTheme();
+        createParticles();
+        updateSnapVisuals(50);
+        recalculate();
+		document.getElementById('footerYear').textContent = new Date().getFullYear();
+        const revealEls=document.querySelectorAll('.reveal');
+        const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+        revealEls.forEach(el=>obs.observe(el));
+    });
+</script>
+</body>
+</html>
