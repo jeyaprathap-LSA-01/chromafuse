@@ -113,34 +113,60 @@ The demo showcases:
 ## Additive Mixing (Digital / Screen)
 
 ```math
-R_{mix} = \frac{R_1 + R_2}{2}
+R_{mix} = \min(R_1 + R_2,\ 255)
 ```
 
-Digital displays emit light directly, so colors become brighter when combined.
+Digital displays emit light directly. Combining two light sources adds their intensities — more light means brighter output. The result is clamped at 255 to stay within the valid RGB range.
+
+> **Example:** Red `RGB(255, 0, 0)` + Green `RGB(0, 255, 0)` → Yellow `RGB(255, 255, 0)`
 
 ---
 
 ## Subtractive Mixing (Paint / Pigments)
 
+Pigments work by absorbing light. To model this accurately, colors are first converted from RGB to CMY space (where each channel represents how much of that light component is **absorbed**), combined by stacking their absorptions, then converted back to RGB.
+
+**Step 1 — Convert RGB → CMY:**
+
 ```math
-R_{sub} = \left(\frac{R_1}{255}\right)\times\left(\frac{R_2}{255}\right)\times255
+C = 1 - \frac{R}{255}, \quad M = 1 - \frac{G}{255}, \quad Y = 1 - \frac{B}{255}
 ```
 
-Pigments absorb portions of incoming light. Each additional pigment reduces remaining reflected light.
+**Step 2 — Stack absorptions (clamp to 1):**
+
+```math
+C_{mix} = \min(C_1 + C_2,\ 1), \quad M_{mix} = \min(M_1 + M_2,\ 1), \quad Y_{mix} = \min(Y_1 + Y_2,\ 1)
+```
+
+**Step 3 — Convert CMY → RGB:**
+
+```math
+R_{mix} = (1 - C_{mix}) \times 255, \quad G_{mix} = (1 - M_{mix}) \times 255, \quad B_{mix} = (1 - Y_{mix}) \times 255
+```
+
+> **Example:** Red `RGB(255, 0, 0)` + Yellow `RGB(255, 255, 0)` → Orange `RGB(255, 128, 0)` 
+> **Example:** Blue `RGB(0, 0, 255)` + Yellow `RGB(255, 255, 0)` → Green `RGB(0, 128, 0)` 
 
 ---
 
 ## Hybrid Paint Simulation
 
+Real paint is neither a perfect light source nor a perfect absorber. The intensity slider blends both models to simulate surface scattering, imperfect pigments, and reflected light.
+
 ```math
-R_{mix} = R_{sub}\times intensity + R_{add}\times(1-intensity)
+R_{mix} = R_{sub} \times intensity + R_{add} \times (1 - intensity)
 ```
 
-The intensity parameter simulates:
-- imperfect pigments
-- surface scattering
-- reflected light
-- realistic paint behavior
+Where:
+- `R_sub` = subtractive result (CMY absorption model above)
+- `R_add` = additive result (clamped sum above)
+- `intensity` = pigment strength slider (0.00 → 1.00)
+
+| Intensity | Behavior |
+|-----------|----------|
+| `0.00` | Pure additive — identical to Digital mode |
+| `0.50` | Balanced blend — models real opaque paint |
+| `1.00` | Pure subtractive — ideal pigment, no surface scatter |
 
 ---
 
@@ -169,12 +195,12 @@ chromafuse/
 ├── sitemap.xml
 ├── og-preview.png
 └── Assets
-   ├── preview-1.png
-   ├── preview-2.png
-   ├── preview-3.png
-   ├── preview-4.png
-   ├── preview-5.png
-   └── preview-6.png
+	├── preview-1.png
+	├── preview-2.png
+	├── preview-3.png
+	├── preview-4.png
+	├── preview-5.png
+	└── preview-6.png
 ```
 
 > Why a single-file architecture?
